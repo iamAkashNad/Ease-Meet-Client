@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar";
 import Signup from "./components/Signup";
 import Alert from "./components/Alert";
 import Landing from "./components/Landing";
+import Profile from "./components/Profile";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </AppState>
     </Router>

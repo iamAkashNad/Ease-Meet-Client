@@ -9,6 +9,20 @@ export default function AppState(props) {
   const [token, setToken] = useState(localStorage.getItem("Authorization"));
   const [userId, setUserId] = useState(localStorage.getItem("userId"));
   const [alert, setAlert] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState(null);
+  const [user, setUser] = useState(null);
+  const [email, setEmail] = useState(null);
+
+  const netError = {
+    type: "warning",
+    message: "Internet connection Interrupted!"
+  };
+
+  const serverError = {
+    type: "danger",
+    message: "Something went wrong Internally!"
+  };
 
   const toggleAlert = (alertData) => {
     setAlert(alertData);
@@ -33,17 +47,11 @@ export default function AppState(props) {
         },
       });
     } catch (error) {
-      return toggleAlert({
-        type: "warning",
-        message: "Internet connection Interrupted!",
-      });
+      return toggleAlert(netError);
     }
 
     if (response.status === 500)
-      return toggleAlert({
-        type: "danger",
-        message: "Something went wrong Internally!",
-      });
+      return toggleAlert(serverError);
 
     const responseData = await response.json();
 
@@ -59,10 +67,8 @@ export default function AppState(props) {
     setUserId(null);
     localStorage.removeItem("Authorization");
     localStorage.removeItem("userId");
-  };
-
-  const setAutoLogout = (milliseconds) => {
-    setTimeout(() => logout(), milliseconds);
+    clearData();
+    navigate("/");
   };
 
   const login = async (event) => {
@@ -83,17 +89,11 @@ export default function AppState(props) {
         },
       });
     } catch (error) {
-      return toggleAlert({
-        type: "warning",
-        message: "Internet connection Interrupted!",
-      });
+      return toggleAlert(netError);
     }
 
     if (response.status === 500)
-      return toggleAlert({
-        type: "danger",
-        message: "Something went wrong Internally!",
-      });
+      return toggleAlert(serverError);
 
     const responseData = await response.json();
     if (!responseData.success) {
@@ -104,12 +104,198 @@ export default function AppState(props) {
     setUserId(responseData.userId);
     localStorage.setItem("Authorization", responseData.token);
     localStorage.setItem("userId", responseData.userId);
-    const remainingMilliseconds = 1000 * 60 * 60 * 2;
-    setAutoLogout(remainingMilliseconds);
     navigate("/");
   };
 
-  const collection = { token, userId, setToken, alert, toggleAlert, signup, login };
+  const sendCodeForForgot = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const submittedEmail = formData.get("email");
+
+    if(!submittedEmail || submittedEmail.trim() === 0) 
+      return toggleAlert({ type: "warning", message: "Please enter a email!" });
+
+    setEmail(submittedEmail);
+    event.target.querySelector("#model-email-input").value = "";
+    document.getElementById("close-model")?.click();
+    let response;
+    try {
+      response = await fetch(`${host}/user/password/forgot?email=${submittedEmail}`);
+    } catch(error) {
+      return toggleAlert(netError);
+    }
+
+    if(response.status === 500) {
+      return toggleAlert(serverError);
+    }
+
+    const responseData = await response.json();
+    if(!responseData.success) {
+      return toggleAlert({ type: "warning", message: responseData.message });
+    }
+    toggleAlert({ type: "success", message: responseData.message })
+  };
+
+  const forgotPassword = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const data = {
+      email,
+      code: formData.get("code"),
+      password: formData.get("password")
+    };
+    let response;
+    try {
+      response = await fetch(`${host}/user/password/forgot`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+    } catch(error) {
+      setEmail(null);
+      return toggleAlert(netError);
+    }
+
+    setEmail(null);
+    if(response.status === 500) return toggleAlert(serverError);
+
+    const responseData = await response.json();
+    toggleAlert({ 
+      type: responseData.success ? "success" : "warning", 
+      message: responseData.message 
+    });
+  };
+
+  const fetchUsers = async () => {
+    let response;
+    setLoading(true);
+    try {
+      response = await fetch(`${host}`, {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      });
+    } catch (error) {
+      setLoading(false);
+      return toggleAlert({
+        type: "warning",
+        message: "Internet connection Interrupted!",
+      });
+    }
+
+    if (response.status === 500) {
+      setLoading(false);
+      return toggleAlert({
+        type: "danger",
+        message: "Something went wrong Internally!",
+      });
+    }
+    
+    const responseData = await response.json();
+
+    setLoading(false);
+    if(!responseData.success)
+      return toggleAlert({ type: "warning", message: responseData.message });
+
+    setUsers(responseData.users);
+  };
+
+  const getProfile = async () => {
+    let response;
+    setLoading(true);
+    try {
+      response = await fetch(`${host}/user`, {
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      });
+    } catch(error) {
+      setLoading(false);
+      return toggleAlert({
+        type: "warning",
+        message: "Internet connection Interrupted!",
+      });
+    }
+
+    if(response.status === 500) {
+      setLoading(false);
+      return toggleAlert({
+        type: "danger",
+        message: "Something went wrong Internally!",
+      });
+    }
+
+    const responseData = await response.json();
+
+    setLoading(false);
+    if(!responseData.success)
+      return toggleAlert({ type: "warning", message: responseData.message });
+
+    setUser(responseData.user);
+  };
+
+  const changeProfileName = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const data = {
+      password: formData.get("password"),
+      name: formData.get("username")
+    };
+
+    event.target.reset();
+    document.getElementById("close-model")?.click();
+    let response;
+    try {
+      response = await fetch(`${host}/user/update`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        }
+      })
+    } catch(error) {
+      return toggleAlert(netError);
+    }
+
+    if(response.status === 500) return toggleAlert(serverError);
+
+    const responseData = await response.json();
+    toggleAlert({ 
+      type: responseData.success ? "success" : "warning",
+      message: responseData.message 
+    });
+    if(responseData.success) setUser({ ...user, name: data.name });
+  };
+
+  const clearData = () => {
+    setEmail(null);
+  };
+
+  const collection = {
+    token,
+    userId,
+    setToken,
+    alert,
+    toggleAlert,
+    signup,
+    login,
+    sendCodeForForgot,
+    forgotPassword,
+    email,
+    setEmail,
+    loading,
+    setLoading,
+    users,
+    fetchUsers,
+    user,
+    getProfile,
+    changeProfileName,
+    clearData,
+    logout
+  };
   return (
     <AppContext.Provider value={collection}>
       {props.children}
