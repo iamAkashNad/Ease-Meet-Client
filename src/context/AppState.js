@@ -59,7 +59,7 @@ export default function AppState(props) {
       return toggleAlert({ type: "warning", message: responseData.message });
     }
 
-    navigate("/login");
+    navigate("/");
   };
 
   const logout = () => {
@@ -115,7 +115,6 @@ export default function AppState(props) {
     if(!submittedEmail || submittedEmail.trim() === 0) 
       return toggleAlert({ type: "warning", message: "Please enter a email!" });
 
-    setEmail(submittedEmail);
     event.target.querySelector("#model-email-input").value = "";
     document.getElementById("close-model")?.click();
     let response;
@@ -133,7 +132,8 @@ export default function AppState(props) {
     if(!responseData.success) {
       return toggleAlert({ type: "warning", message: responseData.message });
     }
-    toggleAlert({ type: "success", message: responseData.message })
+    toggleAlert({ type: "success", message: responseData.message });
+    setEmail(submittedEmail);
   };
 
   const forgotPassword = async (event) => {
@@ -166,6 +166,71 @@ export default function AppState(props) {
       type: responseData.success ? "success" : "warning", 
       message: responseData.message 
     });
+  };
+
+  const sendCodeForVerifyEmail = async () => {
+    if(!user) {
+      logout();
+      return toggleAlert({ 
+        type: "warning",
+        message: "You should authenticated first in order to verify your email!" 
+      });
+    }
+    
+    let response;
+    try {
+      response = await fetch(`${host}/auth/signup/verify?email=${user.email}`);
+    } catch(error) {
+      return toggleAlert(netError);
+    }
+
+    if(response.status === 500) return toggleAlert(serverError);
+
+    const responseData = await response.json();
+    if(!responseData.success) return toggleAlert({ type: "warning", message: responseData.message });
+
+    toggleAlert({ type: "success", message: responseData.message });
+    setEmail(user.email);
+  };
+
+  const verifyEmail = async (event) => {
+    event.preventDefault();
+    if(!user) {
+      logout();
+      return toggleAlert({ 
+        type: "warning",
+        message: "You should authenticated first in order to verify your email!" 
+      });
+    }
+
+    const formData = new FormData(event.target);
+    const data = {
+      code: formData.get("code"),
+      email: user.email
+    };
+
+    let response;
+    try {
+      response = await fetch(`${host}/auth/signup/verify`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+    } catch(error) {
+      setEmail(null);
+      return toggleAlert(netError);
+    }
+
+    setEmail(null);
+    if(response.status === 500) return toggleAlert(serverError);
+
+    const responseData = await response.json();
+    if(!responseData.success) return toggleAlert({ type: "warning", message: responseData.message });
+
+    toggleAlert({ type: "success", message: responseData.message });
+    setUser({ ...user, verified: true });
   };
 
   const fetchUsers = async () => {
@@ -284,6 +349,8 @@ export default function AppState(props) {
     login,
     sendCodeForForgot,
     forgotPassword,
+    sendCodeForVerifyEmail,
+    verifyEmail,
     email,
     setEmail,
     loading,

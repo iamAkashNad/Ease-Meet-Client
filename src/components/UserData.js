@@ -6,7 +6,7 @@ import Input from "./Input";
 import AppContext from "../context/AppContext";
 
 export default function UserData({ user }) {
-  const { changeProfileName } = useContext(AppContext);
+  const { changeProfileName, sendCodeForVerifyEmail } = useContext(AppContext);
   document.title = `Ease Meet (${user.name})`;
   return (
     <>
@@ -32,7 +32,7 @@ export default function UserData({ user }) {
               style={{ fontSize: "1rem", color: "rgb(16, 16, 174)" }}
             ></i>
           ) : (
-            <button className="btn btn-sm btn-primary">verify</button>
+            <button onClick={sendCodeForVerifyEmail} className="btn btn-sm btn-primary">verify</button>
           )}
         </p>
         <hr />
