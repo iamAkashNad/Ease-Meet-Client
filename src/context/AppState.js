@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import AppContext from "./AppContext";
 
 export default function AppState(props) {
   const navigate = useNavigate();
+  const location = useLocation();
   const host = process.env.REACT_APP_HOST;
   const [token, setToken] = useState(localStorage.getItem("Authorization"));
   const [userId, setUserId] = useState(localStorage.getItem("userId"));
@@ -13,6 +14,7 @@ export default function AppState(props) {
   const [users, setUsers] = useState(null);
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState(null);
+  const [appointments, setAppointments] = useState([]);
 
   const netError = {
     type: "warning",
@@ -335,8 +337,31 @@ export default function AppState(props) {
     if(responseData.success) setUser({ ...user, name: data.name });
   };
 
+  const getAppointments = async () => {
+    let response;
+    try {
+      setLoading(true);
+      response = await fetch(`${host}/appointments`, {
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      });
+    } catch(error) {
+      setLoading(false);
+      return toggleAlert(netError);
+    }
+
+    setLoading(false);
+    if(response.status === 500) return toggleAlert(serverError);
+
+    const responseData = await response.json();
+    setAppointments(responseData.appointments);
+  };
+
   const clearData = () => {
     setEmail(null);
+    if(location.pathname !== "/profile") setUser(null);
+    if(location.pathname !== "/") setUsers(null);
   };
 
   const collection = {
@@ -361,6 +386,8 @@ export default function AppState(props) {
     getProfile,
     changeProfileName,
     clearData,
+    appointments,
+    getAppointments,
     logout
   };
   return (

@@ -9,6 +9,8 @@ import Signup from "./components/Signup";
 import Alert from "./components/Alert";
 import Landing from "./components/Landing";
 import Profile from "./components/Profile";
+import Appointments from "./components/Appointments";
+import NotFound from "./components/NotFound";
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/appointments" element={<Appointments />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AppState>
     </Router>
