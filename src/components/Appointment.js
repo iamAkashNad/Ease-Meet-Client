@@ -3,7 +3,7 @@ import React, { useContext } from "react";
 import AppContext from "../context/AppContext";
 
 export default function Appointment({ appointment }) {
-  const { user } = useContext(AppContext);
+  const { userId, cancelAppointment } = useContext(AppContext);
   const getTime = (milli) => {
     return new Date(milli).toLocaleTimeString("en-US", {
       hour12: true,
@@ -22,47 +22,51 @@ export default function Appointment({ appointment }) {
 
   const getUserInfo = (person) => {
     return (
-      <p>
-        {person.name}{" "}
-        {user.email !== person.email ? (
-          <a href={`mailto:${person.email}`}>
+      <span>
+        {`${person.name}${userId === person._id ? "(You)" : ""}`}{" ("}
+        {userId !== person._id ? (
+          <a style={{ textDecoration: "none", color: "black" }} href={`mailto:${person.email}`}>
             {person.email}
           </a>
         ) : (
           <span>{person.email}</span>
-        )}
-      </p>
+        )}{")"}
+      </span>
     );
   };
 
   return (
     <li className="appointment">
       <div className="appointment-body">
-        <h5 className="card-title">{appointment.title}</h5>
-        <p className="card-text">{appointment.agenda}</p>
-        <div
-          className="d-flex time"
-          style={{ justifyContent: "space-between" }}
-        >
-          <p>{getTime(appointment.start)(getDate(appointment.start))}</p>
-          {" ---> "}
-          <p>{getTime(appointment.end)(getDate(appointment.end))}</p>
+        <div className="appointment-meta">
+          <h5 className="card-title">{appointment.title}</h5>
+          <p className="card-text">{appointment.agenda}</p>
         </div>
+        <hr />
+        <div className="appointment-time">
+          <p><strong>Duration</strong>: {(new Date(appointment.end) - new Date(appointment.start)) / (1000 * 60 * 60)} hours</p>
+          <p><strong>Start Time</strong>: {`${getTime(appointment.start)} (${getDate(appointment.start)})`}</p>
+          <p><strong>End Time</strong>: {`${getTime(appointment.end)} (${getDate(appointment.end)})`}</p>
+        </div>
+        <hr />
         <div className="user-info">
           <div className="admin">
-            <p>Admin</p>
-            {getUserInfo(appointment.admin)}
+            <p><strong>Admin</strong>: {getUserInfo(appointment.admin)}</p>
           </div>
           <div className="guest">
-            <p>Guest</p>
-            {getUserInfo(appointment.guest)}
+            <p><strong>Guest</strong>: {getUserInfo(appointment.guest)}</p>
           </div>
         </div>
-        {!appointment.cancel ? (
-          <button className="btn btn-outline-danger">Cancel</button>
-        ) : (
-          <span className="bedge">Cancel</span>
-        )}
+        <hr />
+        <div className="manager">
+          {new Date(appointment.start) <= Date.now() && Date.now() <= new Date(appointment.end) ?
+            <span className="bedge">Running</span>
+          : !appointment.cancel ? (
+            <button onClick={cancelAppointment.bind(null, appointment._id)} className="btn btn-outline-danger">Cancel</button>
+          ) : (
+            <span className="bedge danger">Canceled</span>
+          )}
+        </div>
       </div>
     </li>
   );

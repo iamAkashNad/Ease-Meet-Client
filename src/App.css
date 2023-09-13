@@ -6,6 +6,10 @@
   width: 100%;
 }
 
+strong {
+  font-family: inherit;
+}
+
 .grid  {
   padding: 0;
   margin: auto;
@@ -24,10 +28,56 @@ form,
   margin: auto;
 }
 
+.appointments {
+  width: 70%;
+  margin: auto;
+  margin-bottom: 5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.appointment {
+  width: 100%;
+  margin: 1rem 0;
+  gap: 1rem;
+  text-align: left;
+  padding: 1rem;
+  border: 1px solid black;
+  border-radius: 5px;
+}
+
+.appointment-meta {
+  margin-top: 0;
+}
+
+.appointment p {
+  margin: 0.2rem;
+}
+
+.manager {
+  text-align: right;
+  margin-bottom: 0;
+}
+
+.bedge {
+  padding: 0.4rem 0.8rem;
+  border-radius: 5px;
+  color: white;
+  background-color: rgb(53, 53, 244);
+}
+
+.danger {
+  background-color: rgb(244, 43, 43);
+}
+
 @media (max-width: 1024px) {
   form,
   .user-profile {
     width: 50%;
+  }
+
+  .appointments {
+    width: 80%;
   }
 }
 
@@ -36,6 +86,10 @@ form,
   .user-profile {
     width: 60%;
   }
+
+  .appointments {
+    width: 90%;
+  }
 }
 
 @media (max-width: 650px) {
@@ -43,11 +97,19 @@ form,
   .user-profile {
     width: 75%;
   }
+
+  .appointments {
+    width: 95%;
+  }
 }
 
 @media (max-width: 480px) {
   form,
   .user-profile {
     width: 95%;
+  }
+
+  .appointments {
+    width: 100%;
   }
 }

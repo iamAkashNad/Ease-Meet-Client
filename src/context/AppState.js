@@ -15,6 +15,7 @@ export default function AppState(props) {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState(null);
   const [appointments, setAppointments] = useState([]);
+  const [guest, setGuest] = useState(null);
 
   const netError = {
     type: "warning",
@@ -351,15 +352,91 @@ export default function AppState(props) {
       return toggleAlert(netError);
     }
 
-    setLoading(false);
-    if(response.status === 500) return toggleAlert(serverError);
+    if(response.status === 500) {
+      setLoading(false);
+      return toggleAlert(serverError);
+    }
 
     const responseData = await response.json();
     setAppointments(responseData.appointments);
+    setLoading(false);
+  };
+
+  const assignGuest = (event) => {
+    setUsers(null);
+    setGuest({
+      id: event.target.dataset?.userid,
+      email: event.target.dataset?.email
+    })
+  };
+
+  const scheduleAppointment = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const appointment = {
+      guest: guest.id,
+      title: formData.get("title"),
+      agenda: formData.get("agenda"),
+      start: formData.get("start"),
+      duration: formData.get("duration")
+    };
+
+    let response;
+    try {
+      response = await fetch(`${host}/appointments/schedule`, {
+        method: "POST",
+        body: JSON.stringify(appointment),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        }
+      });
+    } catch(error) {
+      return toggleAlert(netError);
+    }
+
+    if(response.status === 500) toggleAlert(serverError);
+
+    const responseData = await response.json();
+    toggleAlert({ 
+      type: responseData.success ? "success" : "warning",
+      message: responseData.message 
+    });
+    if(responseData.success) setGuest(null);
+  };
+
+  const cancelAppointment = async (meetid) => {
+    if(!meetid) toggleAlert({ type: "warning", message: "Appointment Id must be provided!" });
+
+    let response;
+    try {
+      response = await fetch(`${host}/appointments/${meetid}/cancel`, {
+        method: "PATCH",
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      });
+    } catch(error) {
+      return toggleAlert(netError);
+    }
+
+    if(response.status === 500) return toggleAlert(serverError);
+
+    const responseData = await response.json();
+    if(!responseData.success) return toggleAlert({ type: "warning", message: responseData.message });
+
+    toggleAlert({ type: "success", message: responseData.message });
+    const newAppointments = appointments.map(appointment => {
+      if(appointment._id === meetid) appointment.cancel = true;
+      return appointment;
+    });
+    setAppointments(newAppointments);
   };
 
   const clearData = () => {
     setEmail(null);
+    setGuest(null);
+    if(location.pathname !== "/appointments") setAppointments(null);
     if(location.pathname !== "/profile") setUser(null);
     if(location.pathname !== "/") setUsers(null);
   };
@@ -387,7 +464,12 @@ export default function AppState(props) {
     changeProfileName,
     clearData,
     appointments,
+    guest,
+    setGuest,
     getAppointments,
+    assignGuest,
+    scheduleAppointment,
+    cancelAppointment,
     logout
   };
   return (

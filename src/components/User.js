@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
+
+import AppContext from "../context/AppContext";
 
 export default function User({ user }) {
+  const { assignGuest } = useContext(AppContext);
   return (
     <div className="card">
       <div className="card-body">
@@ -16,7 +19,14 @@ export default function User({ user }) {
           )}
         </h5>
         <p className="card-text">{user.email}</p>
-        <button className="btn btn-sm btn-primary">Ask for Appointment</button>
+        <button
+          onClick={assignGuest}
+          data-userid={user._id}
+          data-email={user.email}
+          className="btn btn-sm btn-primary"
+        >
+          Ask for Appointment
+        </button>
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ export default function Appointments() {
         ) : !appointments || appointments.length === 0 ? (
           <p>No upcoming appointments are there!</p>
         ) : (
-          <ul>
+          <ul className="appointments">
             {appointments.map((appointment) => (
               <Appointment key={appointment._id} appointment={appointment} />
             ))}
