@@ -7,11 +7,11 @@ import AppContext from "../context/AppContext";
 
 export default function UserData({ user }) {
   const { changeProfileName, sendCodeForVerifyEmail } = useContext(AppContext);
-  document.title = `Ease Meet (${user.name})`;
+  document.title = `Ease Meet (${user.name})!`;
   return (
     <>
       <Model title={"Change Profile Name"} id={"update_user_name"}>
-        <form onSubmit={changeProfileName} className="model-form">
+        <form onSubmit={changeProfileName.bind({ id: "update_user_name" })} className="model-form">
             <Input id={"password"} name={"password"} label={"Your Password"} type={"password"} required={true} />
             <Input id={"username"} name={"username"} label={"Profile Name"} type={"text"} required={true} />
             <div className="container">

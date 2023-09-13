@@ -71,6 +71,10 @@ export default function AppState(props) {
     navigate("/");
   };
 
+  const automaticLogout = (milli) => {
+    setTimeout(logout, milli);
+  };
+
   const logout = () => {
     setToken(null);
     setUserId(null);
@@ -113,10 +117,11 @@ export default function AppState(props) {
     setUserId(responseData.userId);
     localStorage.setItem("Authorization", responseData.token);
     localStorage.setItem("userId", responseData.userId);
+    automaticLogout(1000 * 60 * 60 * 2);
     navigate("/");
   };
 
-  const sendCodeForForgot = async (event) => {
+  const sendCodeForForgot = async function (event) {
     event.preventDefault();
     const formData = new FormData(event.target);
     const submittedEmail = formData.get("email");
@@ -124,8 +129,7 @@ export default function AppState(props) {
     if(!submittedEmail || submittedEmail.trim() === 0) 
       return toggleAlert({ type: "warning", message: "Please enter a email!" });
 
-    event.target.querySelector("#model-email-input").value = "";
-    document.querySelectorAll(".close-model").forEach(button => button.click());
+    clearModel(event, this.id);
     let response;
     try {
       response = await fetch(`${host}/user/password/forgot?email=${submittedEmail}`);
@@ -248,23 +252,22 @@ export default function AppState(props) {
     try {
       response = await fetch(`${host}`, {
         headers: {
-          Authorization: "Bearer " + token,
+          "Authorization": "Bearer " + token,
         },
       });
     } catch (error) {
       setLoading(false);
-      return toggleAlert({
-        type: "warning",
-        message: "Internet connection Interrupted!",
-      });
+      return toggleAlert(netError);
     }
 
     if (response.status === 500) {
       setLoading(false);
-      return toggleAlert({
-        type: "danger",
-        message: "Something went wrong Internally!",
-      });
+      return toggleAlert(serverError);
+    }
+
+    if(response.status === 401) {
+      setLoading(false);
+      return logout();
     }
     
     const responseData = await response.json();
@@ -287,18 +290,17 @@ export default function AppState(props) {
       });
     } catch(error) {
       setLoading(false);
-      return toggleAlert({
-        type: "warning",
-        message: "Internet connection Interrupted!",
-      });
+      return toggleAlert(netError);
     }
 
     if(response.status === 500) {
       setLoading(false);
-      return toggleAlert({
-        type: "danger",
-        message: "Something went wrong Internally!",
-      });
+      return toggleAlert(serverError);
+    }
+
+    if(response.status === 401) {
+      setLoading(false);
+      return logout();
     }
 
     const responseData = await response.json();
@@ -310,7 +312,7 @@ export default function AppState(props) {
     setUser(responseData.user);
   };
 
-  const changeProfileName = async (event) => {
+  const changeProfileName = async function (event) {
     event.preventDefault();
     const formData = new FormData(event.target);
     const data = {
@@ -318,8 +320,7 @@ export default function AppState(props) {
       name: formData.get("username")
     };
 
-    event.target.reset();
-    document.querySelectorAll(".close-model").forEach(button => button.click());
+    clearModel(event, this.id);
     let response;
     try {
       response = await fetch(`${host}/user/update`, {
@@ -335,6 +336,7 @@ export default function AppState(props) {
     }
 
     if(response.status === 500) return toggleAlert(serverError);
+    if(response.status === 401) return logout();
 
     const responseData = await response.json();
     toggleAlert({ 
@@ -361,6 +363,11 @@ export default function AppState(props) {
     if(response.status === 500) {
       setLoading(false);
       return toggleAlert(serverError);
+    }
+
+    if(response.status === 401) {
+      setLoading(false);
+      return logout();
     }
 
     const responseData = await response.json();
@@ -401,7 +408,8 @@ export default function AppState(props) {
       return toggleAlert(netError);
     }
 
-    if(response.status === 500) toggleAlert(serverError);
+    if(response.status === 500) return toggleAlert(serverError);
+    if(response.status === 401) return logout();
 
     const responseData = await response.json();
     toggleAlert({ 
@@ -427,6 +435,7 @@ export default function AppState(props) {
     }
 
     if(response.status === 500) return toggleAlert(serverError);
+    if(response.status === 401) return logout();
 
     const responseData = await response.json();
     if(!responseData.success) return toggleAlert({ type: "warning", message: responseData.message });
@@ -456,6 +465,11 @@ export default function AppState(props) {
     if(response.status === 500) {
       setLoading(false);
       return toggleAlert(serverError);
+    }
+
+    if(response.status === 401) {
+      setLoading(false);
+      return logout();
     }
 
     const responseData = await response.json();
@@ -493,6 +507,11 @@ export default function AppState(props) {
       return toggleAlert(serverError);
     }
 
+    if(response.status === 401) {
+      clearModel(event, this.id);
+      return logout();
+    }
+
     const responseData = await response.json();
 
     toggleAlert({ 
@@ -519,6 +538,7 @@ export default function AppState(props) {
     }
 
     if(response.status === 500) return toggleAlert(serverError);
+    if(response.status === 401) return logout();
 
     const responseData = await response.json();
 

@@ -32,7 +32,7 @@ export default function OffHours() {
                 <p>No off hours are there!</p>
             ) : (
                 <ul className="grid">
-                    {offHours.map(offHour => <OffHour offHour={offHour} />)}
+                    {offHours.map(offHour => <OffHour key={offHour._id} offHour={offHour} />)}
                 </ul>
             )}
         </div>

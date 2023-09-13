@@ -6,6 +6,7 @@ import Appointment from "./Appointment";
 
 export default function Appointments() {
   const { appointments, getAppointments, loading } = useContext(AppContext);
+  document.title = "Ease Meet (Your upcoming Appointments)!";
   useEffect(() => {
     getAppointments();
     // eslint-disable-next-line

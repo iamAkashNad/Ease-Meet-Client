@@ -27,7 +27,9 @@ export default function Landing() {
         label={"Password"}
         required={true}
       />
-      <button className="btn btn-primary">Forgot Password!</button>
+      <div className="container">
+        <button className="btn btn-primary">Forgot Password!</button>
+      </div>
     </form>
   ) : !token ? (
     <Login />

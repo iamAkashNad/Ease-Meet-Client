@@ -14,7 +14,7 @@ export default function Login() {
     <div className="container margin-top-3">
       <h2 className="mb-4 text-center">Log In</h2>
       <Model title={"Send Code for Forgot Password!"} id={"forgot_password"}>
-        <form className="model-form" onSubmit={sendCodeForForgot}>
+        <form className="model-form" onSubmit={sendCodeForForgot.bind({ id: "forgot_password" })}>
           <Input label={"Email Address"} id={"model-email-input"} type={"email"} name={"email"} key={"model-email-input"} required={true} />
           <div className="container">
             <button className="btn btn-primary">Send</button>

@@ -10,7 +10,9 @@ export default function OffHour({ offHour }) {
             <p><strong>From</strong>: {`${getTime(offHour.start)} (${getDate(offHour.start)})`}</p>
             <p><strong>To</strong>: {`${getTime(offHour.end)} (${getDate(offHour.end)})`}</p>
             <div style={{ textAlign: "right" }}>
-                <button onClick={deleteOffHour.bind(null, offHour._id)} className="btn btn-sm btn-danger">Delete</button>
+                <button onClick={deleteOffHour.bind(null, offHour._id)} className="btn btn-sm btn-outline-danger">
+                    <i className="fa-solid fa-trash"></i>
+                </button>
             </div>
         </article>
     </li>
