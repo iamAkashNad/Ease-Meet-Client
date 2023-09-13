@@ -16,6 +16,7 @@ export default function AppState(props) {
   const [email, setEmail] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [guest, setGuest] = useState(null);
+  const [offHours, setOffHours] = useState([]);
 
   const netError = {
     type: "warning",
@@ -25,6 +26,11 @@ export default function AppState(props) {
   const serverError = {
     type: "danger",
     message: "Something went wrong Internally!"
+  };
+
+  const clearModel = function (event, id) {
+    event.target.reset();
+    document.getElementById(id).querySelector(".close-model")?.click();
   };
 
   const toggleAlert = (alertData) => {
@@ -119,7 +125,7 @@ export default function AppState(props) {
       return toggleAlert({ type: "warning", message: "Please enter a email!" });
 
     event.target.querySelector("#model-email-input").value = "";
-    document.getElementById("close-model")?.click();
+    document.querySelectorAll(".close-model").forEach(button => button.click());
     let response;
     try {
       response = await fetch(`${host}/user/password/forgot?email=${submittedEmail}`);
@@ -313,7 +319,7 @@ export default function AppState(props) {
     };
 
     event.target.reset();
-    document.getElementById("close-model")?.click();
+    document.querySelectorAll(".close-model").forEach(button => button.click());
     let response;
     try {
       response = await fetch(`${host}/user/update`, {
@@ -433,11 +439,124 @@ export default function AppState(props) {
     setAppointments(newAppointments);
   };
 
+  const getOffHours = async () => {
+    let response;
+    try {
+      setLoading(true);
+      response = await fetch(`${host}/user/off-hours`, {
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      });
+    } catch(error) {
+      setLoading(false);
+      return toggleAlert(netError);
+    }
+
+    if(response.status === 500) {
+      setLoading(false);
+      return toggleAlert(serverError);
+    }
+
+    const responseData = await response.json();
+
+    setLoading(false);
+    if(!responseData.success) return toggleAlert({ type: "warning", message: responseData.message });
+    setOffHours(responseData.offHours);
+  };
+
+  const addOffHour = async function (event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const offHour = {
+      start: formData.get("start"),
+      end: formData.get("end")
+    };
+
+    let response;
+    try {
+      response = await fetch(`${host}/user/off-hours/add`, {
+        method: "POST",
+        body: JSON.stringify(offHour),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        }
+      })
+    } catch(error) {
+      clearModel(event, this.id);
+      return toggleAlert(netError);
+    }
+
+    if(response.status === 500) {
+      clearModel(event, this.id);
+      return toggleAlert(serverError);
+    }
+
+    const responseData = await response.json();
+
+    toggleAlert({ 
+      type: responseData.success ? "success" : "warning", 
+      message: responseData.message 
+    });
+    clearModel(event, this.id);
+    if(responseData.success) getOffHours();
+  };
+
+  const deleteOffHour = async (offHourId) => {
+    if(!offHourId) return toggleAlert({ type: "warning", message: "Off hour Id must be provided!" });
+
+    let response;
+    try {
+      response = await fetch(`${host}/user/off-hours/${offHourId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      });
+    } catch(error) {
+      return toggleAlert(netError);
+    }
+
+    if(response.status === 500) return toggleAlert(serverError);
+
+    const responseData = await response.json();
+
+    toggleAlert({
+      type: responseData.success ? "success" : "warning",
+      message: responseData.message
+    });
+
+    if(responseData.success) {
+      const newOffHours = offHours.filter(offHour => offHour._id !== offHourId);
+      setOffHours(newOffHours);
+    }
+  };
+
+  const getTime = (milli) => {
+    return new Date(milli).toLocaleTimeString("en-US", {
+      hour12: true,
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  };
+  const getDate = (milli) => {
+    return new Date(milli).toLocaleDateString("en-US", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
   const clearData = () => {
     setEmail(null);
     setGuest(null);
     if(location.pathname !== "/appointments") setAppointments(null);
-    if(location.pathname !== "/profile") setUser(null);
+    if(location.pathname !== "/profile") {
+      setUser(null);
+      setOffHours(null);
+    }
     if(location.pathname !== "/") setUsers(null);
   };
 
@@ -462,6 +581,10 @@ export default function AppState(props) {
     user,
     getProfile,
     changeProfileName,
+    offHours,
+    getOffHours,
+    addOffHour,
+    deleteOffHour,
     clearData,
     appointments,
     guest,
@@ -470,6 +593,8 @@ export default function AppState(props) {
     assignGuest,
     scheduleAppointment,
     cancelAppointment,
+    getTime,
+    getDate,
     logout
   };
   return (

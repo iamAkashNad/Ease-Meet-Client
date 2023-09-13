@@ -3,7 +3,7 @@ import React from "react";
 export default function TextArea({ row, id, name, label, required }) {
   return (
     <div className="mb-3 container">
-      <label htmlFor={id} class="form-label">
+      <label htmlFor={id} className="form-label">
         {label}
       </label>
       <textarea

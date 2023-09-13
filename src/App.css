@@ -12,6 +12,7 @@ strong {
 
 .grid  {
   padding: 0;
+  list-style: none;
   margin: auto;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
@@ -28,7 +29,8 @@ form,
   margin: auto;
 }
 
-.appointments {
+.appointments,
+.off-hours {
   width: 70%;
   margin: auto;
   margin-bottom: 5rem;
@@ -36,7 +38,8 @@ form,
   list-style: none;
 }
 
-.appointment {
+.appointment,
+.off-hour {
   width: 100%;
   margin: 1rem 0;
   gap: 1rem;
@@ -46,11 +49,18 @@ form,
   border-radius: 5px;
 }
 
+.off-hour {
+  padding: 0.3rem;
+  text-align: left;
+  margin: 0;
+}
+
 .appointment-meta {
   margin-top: 0;
 }
 
-.appointment p {
+.appointment p,
+.off-hour p {
   margin: 0.2rem;
 }
 

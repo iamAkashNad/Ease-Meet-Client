@@ -1,10 +1,10 @@
 import React from "react";
 
-export default function Model({ children, title }) {
+export default function Model({ children, title, id }) {
   return (
     <div
       className="modal fade"
-      id="exampleModal"
+      id={id}
       tabIndex="-1"
       aria-labelledby="exampleModalLabel"
       aria-hidden="true"
@@ -24,7 +24,7 @@ export default function Model({ children, title }) {
           </div>
           <div className="modal-body">
             { children }
-            <button style={{ display: "none" }} id="close-model" data-bs-dismiss="modal"></button>
+            <button style={{ display: "none" }} className="close-model" data-bs-dismiss="modal"></button>
           </div>
         </div>
       </div>

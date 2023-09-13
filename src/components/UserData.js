@@ -10,7 +10,7 @@ export default function UserData({ user }) {
   document.title = `Ease Meet (${user.name})`;
   return (
     <>
-      <Model title={"Change Profile Name"}>
+      <Model title={"Change Profile Name"} id={"update_user_name"}>
         <form onSubmit={changeProfileName} className="model-form">
             <Input id={"password"} name={"password"} label={"Your Password"} type={"password"} required={true} />
             <Input id={"username"} name={"username"} label={"Profile Name"} type={"text"} required={true} />
@@ -38,7 +38,7 @@ export default function UserData({ user }) {
         <hr />
         <button
           data-bs-toggle="modal"
-          data-bs-target="#exampleModal"
+          data-bs-target="#update_user_name"
           className="btn btn-sm btn-primary"
         >
           Update Profile Name

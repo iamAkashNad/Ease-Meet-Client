@@ -3,22 +3,7 @@ import React, { useContext } from "react";
 import AppContext from "../context/AppContext";
 
 export default function Appointment({ appointment }) {
-  const { userId, cancelAppointment } = useContext(AppContext);
-  const getTime = (milli) => {
-    return new Date(milli).toLocaleTimeString("en-US", {
-      hour12: true,
-      hour: "numeric",
-      minute: "2-digit",
-    });
-  };
-  const getDate = (milli) => {
-    return new Date(milli).toLocaleDateString("en-US", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  };
+  const { userId, cancelAppointment, getTime, getDate } = useContext(AppContext);
 
   const getUserInfo = (person) => {
     return (

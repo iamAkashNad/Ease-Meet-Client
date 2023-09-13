@@ -13,7 +13,7 @@ export default function Login() {
   return (
     <div className="container margin-top-3">
       <h2 className="mb-4 text-center">Log In</h2>
-      <Model title={"Send Code for Forgot Password!"}>
+      <Model title={"Send Code for Forgot Password!"} id={"forgot_password"}>
         <form className="model-form" onSubmit={sendCodeForForgot}>
           <Input label={"Email Address"} id={"model-email-input"} type={"email"} name={"email"} key={"model-email-input"} required={true} />
           <div className="container">
@@ -27,7 +27,7 @@ export default function Login() {
           <button 
             type="button" 
             data-bs-toggle="modal" 
-            data-bs-target="#exampleModal" 
+            data-bs-target="#forgot_password" 
             style={{ padding: "0", border: "none", backgroundColor: "transparent" }}>
               Forgot Password?
           </button>

@@ -5,15 +5,14 @@ import AppContext from "../context/AppContext";
 import Spinner from "./Spinner";
 import UserData from "./UserData";
 import Input from "./Input";
+import OffHours from "./OffHours";
 
 export default function Profile() {
-  const { user, getProfile, loading, verifyEmail, email } = useContext(AppContext);
+  const { user, getProfile, getOffHours, loading, verifyEmail, email } = useContext(AppContext);
 
   useEffect(() => {
-    async function profile() {
-      await getProfile();
-    }
-    profile();
+    getProfile();
+    getOffHours();
     // eslint-disable-next-line
   }, []);
 
@@ -34,7 +33,11 @@ export default function Profile() {
       </div>
     </form>
   ) : user ? (
-    <UserData user={user} />
+    <div className="container">
+      <UserData user={user} />
+      <hr />
+      <OffHours />
+    </div>
   ) : (
     ""
   );
