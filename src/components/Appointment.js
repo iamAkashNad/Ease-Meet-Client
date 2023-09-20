@@ -44,12 +44,12 @@ export default function Appointment({ appointment }) {
         </div>
         <hr />
         <div className="manager">
-          {new Date(appointment.start) <= Date.now() && Date.now() <= new Date(appointment.end) ?
-            <span className="bedge">Running</span>
-          : !appointment.cancel ? (
-            <button onClick={cancelAppointment.bind(null, appointment._id)} className="btn btn-outline-danger">Cancel</button>
-          ) : (
+          {appointment.cancel ?
             <span className="bedge danger">Canceled</span>
+          : new Date(appointment.start) <= Date.now() && Date.now() <= new Date(appointment.end) ?
+            <span className="bedge">Running</span>
+          : (
+            <button onClick={cancelAppointment.bind(null, appointment._id)} className="btn btn-outline-danger">Cancel</button>
           )}
         </div>
       </div>
